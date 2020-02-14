@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Template Test</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script type="text/javascript">
+
+		// count items for table and group header
+		var countItems = function(){
+			$(".freqGroup").each(function(){
+				var count =  0
+				$(this).find(".card").each(function(){
+					if (!$(this).hasClass('d-none')) {
+						count++
+					}
+				})
+				countItemString = count + " items"
+				$(this).find(".itemCount").html(countItemString)
+				var freq = $(this).data('freq')
+				var tableFreqCount = `#tableFreqCount${freq}`
+				$(tableFreqCount).html(count)
+
+			})
+		}
+
+		// main filter function
+		$(document).ready(function(){
+		  $(".filterInput").on("keyup", function(e) {
+		  	$(this).val($(this).val().toUpperCase())
+
+		  	//convert value of active field to lowercase
+		    var value = $(this).val().toLowerCase();
+
+		    //hide all items by default, only reveal ones that match search criteria
+		  	$(".itemlist").addClass('d-none')
+
+		  	//determine what if any MPV fields are being used
+		  	var mpvFlag = false
+		    var valueAsClass = ""
+	    	if ($("#searchMF").val() !== '') {
+		    	valueAsClass += '.mf' + $("#searchMF").val().toUpperCase()
+		    	mpvFlag = true
+		    }
+		    if ($("#searchPD").val() !== '') {
+		    	valueAsClass += '.pd' + $("#searchPD").val().toUpperCase()
+		    	mpvFlag = true
+		    }
+		    if ($("#searchVN").val() !== '') {
+		    	valueAsClass += '.vn' + $("#searchVN").val().toUpperCase()
+		    	mpvFlag = true
+		    }
+
+
+		    // filter by MPV and search or just search only
+		    if (mpvFlag) {
+		    	$(".itemlist").filter(valueAsClass).removeClass('d-none');
+		    	var itemlistContains = `.itemlist:not(:contains('${value.toUpperCase()}'))`
+		    	$(itemlistContains).addClass('d-none')
+		    } else {
+		    	var itemlistContains = `.itemlist:contains('${value.toUpperCase()}')`
+		    	$(itemlistContains).removeClass('d-none')
+		    }
+
+		    // toggle clear button if fields are empty
+		    var fieldsEmptyFlag = true
+		    $('.filterInput').each(function(){
+		    	if ($(this).val() != '') {
+		    		fieldsEmptyFlag = false
+		    	}
+		    })
+		    clearfilter = $('#clearfilter')
+		    if (fieldsEmptyFlag) {
+		    	clearfilter.addClass('d-none')
+		    } else {
+		    	clearfilter.removeClass('d-none')
+		    }
+
+		    //count 
+		    countItems()
+
+		  });
+		});
+
+		// revent default if user its enter in filter list
+		$(document).ready(function(){
+			$(".filterInput").on('submit', function(e){
+				e.preventDefault();
+			})
+		})
+
+		//clear filter button
+		$(document).ready(function(){
+			$('#clearfilter').click(function(){
+				$('.filterInput').val('')
+				$(".itemlist").filter(function() {
+					$(".itemlist").toggle($(this).text().toLowerCase().indexOf("") > -1)
+				});
+				$('.itemlist').removeClass('d-none')
+			    $(this).addClass('d-none')
+			    countItems()
+			    $(window).scrollTo(0,0)
+			})
+		})
+		
+		// make summary table rows clickable
+		$(document).ready(function(){
+			$(".clickable-row").click(function(){
+				window.location = $(this).data('href')
+			})
+		})
+
+		// scroll top button action
+		$(document).ready(function(){
+			$("#scrolltop").click(function(){
+				window.scrollTo(0,0)
+			})
+		})
+
+		// show button
+		$(document).ready(function(){
+			window.onscroll = function() {
+				if ($(document).scrollTop() > 200) {
+					$("#scrolltop").css('display', 'block')
+				} else {
+					$("#scrolltop").css('display', 'none')
+				}
+			}
+		})
+
+	</script>
+
+	<style type="text/css">
+		#scrolltop {
+			display: none;
+			position: fixed;
+			bottom: 20px;
+			left: 20px;
+		}
+
+	</style>
+</head>
+<body>
+
+	<div class="container">
+
+		<div class="jumbotron">
+			<h1>BUY ALERT</h1>
+			<h6>Last 90 days from 02-14-2020</h6>
+			<div class="form-group">
+				<form id="searchBarForm" class="form-inline">
+					<input id="searchBar" class="form-control filterInput" type="text" placeholder="Filter" aria-label="Search" autocomplete="off">
+					<input id="searchMF" class="form-control filterInput mpvFilter" type="text" placeholder="MF" aria-label="Search" autocomplete="off" maxlength=2 size=2>
+					<input id="searchPD" class="form-control filterInput mpvFilter" type="text" placeholder="PD" aria-label="Search" autocomplete="off" maxlength=2 size=2>
+					<input id="searchVN" class="form-control filterInput mpvFilter" type="text" placeholder="VN" aria-label="Search" autocomplete="off" maxlength=2 size=2>
+					&nbsp;&nbsp;<button id="clearfilter" class="btn btn-sm btn-danger d-none">Clear Filter</button>
+				</form>
+			</div>
+		</div>
+
+		<!-- Summary Table -->
+		<h2>Summary</h2>
+		<table class="table table-sm text-center">
+			<thead>
+				<tr>
+					<th>HITS</th>
+					<th>#ITEMS</th>
+				</tr>
+			</thead>
+			<tbody>
+			
+				
+					<tr class="clickable-row" data-href="#freqGroup5" style="cursor: pointer;">
+						<td>5</td>
+						<td id="tableFreqCount5" class="itemCount">1</td>
+					</tr>
+				
+			
+				
+					<tr class="clickable-row" data-href="#freqGroup4" style="cursor: pointer;">
+						<td>4</td>
+						<td id="tableFreqCount4" class="itemCount">6</td>
+					</tr>
+				
+			
+				
+					<tr class="clickable-row" data-href="#freqGroup3" style="cursor: pointer;">
+						<td>3</td>
+						<td id="tableFreqCount3" class="itemCount">14</td>
+					</tr>
+				
+			
+				
+					<tr class="clickable-row" data-href="#freqGroup2" style="cursor: pointer;">
+						<td>2</td>
+						<td id="tableFreqCount2" class="itemCount">29</td>
+					</tr>
+				
+			
+			</tbody>
+		</table>
+
+		<!-- Report -->
+		<h2>Report</h2>
+		
+			
+			<div id="freqGroup5" class="freqGroup" data-freq="5">
+				<h3>5 HITS - <span class="text-muted itemCount">1 items</span></h3>
+				
+					<div class="card itemlist mfXX pd01 vnXX">
+						<div class="card-body">
+							<h4>Desc: 4/M-20 CK STP FITS M-10C LNRD </h4>
+							<h4>MPV: <span class="mf">XX</span> <span class="pd">01</span> <span class="vn">XX</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=12284M20" target="_blank">12284M20</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-27</li>				
+								
+									<li>2019-11-23</li>				
+								
+									<li>2019-12-27</li>				
+								
+									<li>2019-11-20</li>				
+								
+									<li>2019-11-29</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+			</div>
+			<br>
+			
+		
+			
+			<div id="freqGroup4" class="freqGroup" data-freq="4">
+				<h3>4 HITS - <span class="text-muted itemCount">6 items</span></h3>
+				
+					<div class="card itemlist mfSW pdSN vnSW">
+						<div class="card-body">
+							<h4>Desc: 1-1/2X6        304 SS NIPPLE </h4>
+							<h4>MPV: <span class="mf">SW</span> <span class="pd">SN</span> <span class="vn">SW</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=037508172" target="_blank">037508172</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-22</li>				
+								
+									<li>2019-11-22</li>				
+								
+									<li>2019-11-26</li>				
+								
+									<li>2019-11-29</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfXX pd01 vnXX">
+						<div class="card-body">
+							<h4>Desc: 806-005 1/2 PVC80 SXS 90 ELL 16980</h4>
+							<h4>MPV: <span class="mf">XX</span> <span class="pd">01</span> <span class="vn">XX</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=060S806005" target="_blank">060S806005</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-25</li>				
+								
+									<li>2019-12-20</li>				
+								
+									<li>2019-12-22</li>				
+								
+									<li>2019-12-13</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfDO pdGA vnDO">
+						<div class="card-body">
+							<h4>Desc: 1675NPFS36 YELLOW GAS CONNECT DORMONT</h4>
+							<h4>MPV: <span class="mf">DO</span> <span class="pd">GA</span> <span class="vn">DO</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=140D1675NPFS36" target="_blank">140D1675NPFS36</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-28</li>				
+								
+									<li>2019-11-22</li>				
+								
+									<li>2019-12-24</li>				
+								
+									<li>2019-12-12</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfJS pdES vnZZ">
+						<div class="card-body">
+							<h4>Desc: C90-300  3" SS EXT COVER </h4>
+							<h4>MPV: <span class="mf">JS</span> <span class="pd">ES</span> <span class="vn">ZZ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=140JC90300" target="_blank">140JC90300</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-27</li>				
+								
+									<li>2019-12-13</li>				
+								
+									<li>2019-12-28</li>				
+								
+									<li>2019-11-19</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfIP pdSL vnSM">
+						<div class="card-body">
+							<h4>Desc: 83250 BATHTUB PROTECTOR </h4>
+							<h4>MPV: <span class="mf">IP</span> <span class="pd">SL</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=149383250" target="_blank">149383250</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-19</li>				
+								
+									<li>2019-11-17</li>				
+								
+									<li>2019-12-16</li>				
+								
+									<li>2019-11-29</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAO pdWH vnZZ">
+						<div class="card-body">
+							<h4>Desc: BTH250A NG COMM W HTR ASME 300 </h4>
+							<h4>MPV: <span class="mf">AO</span> <span class="pd">WH</span> <span class="vn">ZZ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1657BTH250AN300" target="_blank">1657BTH250AN300</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-20</li>				
+								
+									<li>2019-11-20</li>				
+								
+									<li>2019-11-18</li>				
+								
+									<li>2019-11-27</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+			</div>
+			<br>
+			
+		
+			
+			<div id="freqGroup3" class="freqGroup" data-freq="3">
+				<h3>3 HITS - <span class="text-muted itemCount">14 items</span></h3>
+				
+					<div class="card itemlist mfLS pdP8 vnGF">
+						<div class="card-body">
+							<h4>Desc: 801-007 3/4 SCH80 PVC TEE </h4>
+							<h4>MPV: <span class="mf">LS</span> <span class="pd">P8</span> <span class="vn">GF</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=060S801007" target="_blank">060S801007</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-20</li>				
+								
+									<li>2019-11-25</li>				
+								
+									<li>2019-11-16</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfWB pdPX vnS$">
+						<div class="card-body">
+							<h4>Desc: Q2237557 3/4X3X1/2    MANIFOLD UPONOR MANIFOLD</h4>
+							<h4>MPV: <span class="mf">WB</span> <span class="pd">PX</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0626Q2237557" target="_blank">0626Q2237557</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-24</li>				
+								
+									<li>2019-12-26</li>				
+								
+									<li>2019-11-30</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAS pdTB vnAS">
+						<div class="card-body">
+							<h4>Desc: 2946.202.011 ARC LH 60X32 TUB STUDIO</h4>
+							<h4>MPV: <span class="mf">AS</span> <span class="pd">TB</span> <span class="vn">AS</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=10032946202011" target="_blank">10032946202011</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-25</li>				
+								
+									<li>2019-12-13</li>				
+								
+									<li>2019-11-23</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfXX pd01 vnXX">
+						<div class="card-body">
+							<h4>Desc: 1-1/4 FLEX COUP HPFRC114</h4>
+							<h4>MPV: <span class="mf">XX</span> <span class="pd">01</span> <span class="vn">XX</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1301HPFRC114" target="_blank">1301HPFRC114</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-20</li>				
+								
+									<li>2019-12-21</li>				
+								
+									<li>2019-12-12</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfJS pdCN vnSM">
+						<div class="card-body">
+							<h4>Desc: T06-430 4X3 FLEX COUPLING 1056</h4>
+							<h4>MPV: <span class="mf">JS</span> <span class="pd">CN</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=140JT06430" target="_blank">140JT06430</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-24</li>				
+								
+									<li>2019-12-21</li>				
+								
+									<li>2019-12-12</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfSX pdSH vnS$">
+						<div class="card-body">
+							<h4>Desc: 972-361PK2 CHR SMART SPOUT & A W/DIVERTER</h4>
+							<h4>MPV: <span class="mf">SX</span> <span class="pd">SH</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1474972361PK2" target="_blank">1474972361PK2</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-22</li>				
+								
+									<li>2019-12-13</li>				
+								
+									<li>2019-11-28</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfXX pd01 vnXX">
+						<div class="card-body">
+							<h4>Desc: EZWSRK EZH20 RETRO-FIT BTL FLR </h4>
+							<h4>MPV: <span class="mf">XX</span> <span class="pd">01</span> <span class="vn">XX</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1604EZWSRK" target="_blank">1604EZWSRK</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-30</li>				
+								
+									<li>2019-11-18</li>				
+								
+									<li>2019-11-28</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAO pdWH vnXX">
+						<div class="card-body">
+							<h4>Desc: DRE80  6KW      208V  3PH </h4>
+							<h4>MPV: <span class="mf">AO</span> <span class="pd">WH</span> <span class="vn">XX</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1657DRE80KB3" target="_blank">1657DRE80KB3</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-16</li>				
+								
+									<li>2019-12-12</li>				
+								
+									<li>2019-11-28</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAO pdWP vnS$">
+						<div class="card-body">
+							<h4>Desc: 100109200 NG #33ORIF FNL BURNR 9003379005</h4>
+							<h4>MPV: <span class="mf">AO</span> <span class="pd">WP</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1660100109200" target="_blank">1660100109200</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-21</li>				
+								
+									<li>2019-11-21</li>				
+								
+									<li>2019-11-27</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfBR pdDR vnBR">
+						<div class="card-body">
+							<h4>Desc: BH222P 2 PULL TIGHT SHOWER DRN </h4>
+							<h4>MPV: <span class="mf">BR</span> <span class="pd">DR</span> <span class="vn">BR</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=3230BH222P" target="_blank">3230BH222P</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-28</li>				
+								
+									<li>2019-12-11</li>				
+								
+									<li>2019-12-22</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfOA pdTL vnS$">
+						<div class="card-body">
+							<h4>Desc: 010-205             MANOMETER </h4>
+							<h4>MPV: <span class="mf">OA</span> <span class="pd">TL</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=5115010205" target="_blank">5115010205</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-28</li>				
+								
+									<li>2019-11-20</li>				
+								
+									<li>2019-11-19</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfPL pdSC vnPL">
+						<div class="card-body">
+							<h4>Desc: 3009-ARC ADAPT RING F/24" CORR HDPE PIPE</h4>
+							<h4>MPV: <span class="mf">PL</span> <span class="pd">SC</span> <span class="vn">PL</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=53133009ARC" target="_blank">53133009ARC</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-20</li>				
+								
+									<li>2019-11-21</li>				
+								
+									<li>2019-12-29</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAQ pdMP vnAQ">
+						<div class="card-body">
+							<h4>Desc: 4842PAN-WH  48X42 SHOWER PAN </h4>
+							<h4>MPV: <span class="mf">AQ</span> <span class="pd">MP</span> <span class="vn">AQ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=55004842PANWH" target="_blank">55004842PANWH</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-23</li>				
+								
+									<li>2019-11-17</li>				
+								
+									<li>2019-11-18</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAQ pd01 vnAQ">
+						<div class="card-body">
+							<h4>Desc: 6035SKMR-WH 60X35 RH GTUB </h4>
+							<h4>MPV: <span class="mf">AQ</span> <span class="pd">01</span> <span class="vn">AQ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=55006035SKMRWH" target="_blank">55006035SKMRWH</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-19</li>				
+								
+									<li>2019-11-23</li>				
+								
+									<li>2019-11-30</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+			</div>
+			<br>
+			
+		
+			
+			<div id="freqGroup2" class="freqGroup" data-freq="2">
+				<h3>2 HITS - <span class="text-muted itemCount">29 items</span></h3>
+				
+					<div class="card itemlist mfKE pdXH vnKE">
+						<div class="card-body">
+							<h4>Desc: 3/4    XH BLK A53A IMP PE PIPE </h4>
+							<h4>MPV: <span class="mf">KE</span> <span class="pd">XH</span> <span class="vn">KE</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=000547007" target="_blank">000547007</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-24</li>				
+								
+									<li>2019-11-25</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfOM pdGA vnOM">
+						<div class="card-body">
+							<h4>Desc: FGP-ASP90S-500 1/2" STUB-OUT </h4>
+							<h4>MPV: <span class="mf">OM</span> <span class="pd">GA</span> <span class="vn">OM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0496FGPASP90S" target="_blank">0496FGPASP90S</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-24</li>				
+								
+									<li>2019-11-25</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfHY pdPH vnSM">
+						<div class="card-body">
+							<h4>Desc: 3 IPS GALV STRUT CLAMP </h4>
+							<h4>MPV: <span class="mf">HY</span> <span class="pd">PH</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0505AS1100ASR" target="_blank">0505AS1100ASR</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-23</li>				
+								
+									<li>2019-12-23</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfXX pd01 vnXX">
+						<div class="card-body">
+							<h4>Desc: 801-005 1/2 PVC80 SXSXS TEE 16972</h4>
+							<h4>MPV: <span class="mf">XX</span> <span class="pd">01</span> <span class="vn">XX</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=060S801005" target="_blank">060S801005</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-25</li>				
+								
+									<li>2019-12-10</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfLS pdP8 vnGF">
+						<div class="card-body">
+							<h4>Desc: 836-020 2 PVC SCH80 MIP ADAPT </h4>
+							<h4>MPV: <span class="mf">LS</span> <span class="pd">P8</span> <span class="vn">GF</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=060S836020" target="_blank">060S836020</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-16</li>				
+								
+									<li>2019-11-18</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfLS pdC8 vnGF">
+						<div class="card-body">
+							<h4>Desc: 847-015C 1-1/2 CPVC CAP SCH80</h4>
+							<h4>MPV: <span class="mf">LS</span> <span class="pd">C8</span> <span class="vn">GF</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=060S847015C" target="_blank">060S847015C</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-22</li>				
+								
+									<li>2019-11-20</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfNB pdC4 vnSP">
+						<div class="card-body">
+							<h4>Desc: 1-1/4           CPVC SXSXS TEE </h4>
+							<h4>MPV: <span class="mf">NB</span> <span class="pd">C4</span> <span class="vn">SP</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=062151050" target="_blank">062151050</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-28</li>				
+								
+									<li>2019-11-16</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfNB pdC4 vnZZ">
+						<div class="card-body">
+							<h4>Desc: 4733LF 3/4 SXCOP UN CPVC CTS 4199-007BRG</h4>
+							<h4>MPV: <span class="mf">NB</span> <span class="pd">C4</span> <span class="vn">ZZ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0621M25015L" target="_blank">0621M25015L</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-26</li>				
+								
+									<li>2019-11-21</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfNB pdDF vnSM">
+						<div class="card-body">
+							<h4>Desc: 040506 SDR 35 SW 6" 45 ELLS 6" SDR 45 ELL</h4>
+							<h4>MPV: <span class="mf">NB</span> <span class="pd">DF</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0644040506" target="_blank">0644040506</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-16</li>				
+								
+									<li>2019-12-27</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfCA pdSB vnDR">
+						<div class="card-body">
+							<h4>Desc: U-4016LF 3/4 PB CONV COUPLING  POLYBUTALENE CONV</h4>
+							<h4>MPV: <span class="mf">CA</span> <span class="pd">SB</span> <span class="vn">DR</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0769U4016LF" target="_blank">0769U4016LF</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-14</li>				
+								
+									<li>2019-11-23</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfSB pdP$ vnS$">
+						<div class="card-body">
+							<h4>Desc: UXL115450F 2X2F NPT CON </h4>
+							<h4>MPV: <span class="mf">SB</span> <span class="pd">P$</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0769UXL115450F" target="_blank">0769UXL115450F</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-27</li>				
+								
+									<li>2019-12-11</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfSB pdSB vnS$">
+						<div class="card-body">
+							<h4>Desc: UXL115450M 2X2M NPT CON </h4>
+							<h4>MPV: <span class="mf">SB</span> <span class="pd">SB</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=0769UXL115450M" target="_blank">0769UXL115450M</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-27</li>				
+								
+									<li>2019-11-28</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAS pdFI vnS$">
+						<div class="card-body">
+							<h4>Desc: 4192A.105.020 WHT RH TANK 12R COLONY</h4>
+							<h4>MPV: <span class="mf">AS</span> <span class="pd">FI</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=10024192A105020" target="_blank">10024192A105020</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-24</li>				
+								
+									<li>2019-11-22</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAS pdFA vnDR">
+						<div class="card-body">
+							<h4>Desc: 4205.001.002 CHROME SINK FCT W/CHROME SPRAY SGL LEVER</h4>
+							<h4>MPV: <span class="mf">AS</span> <span class="pd">FA</span> <span class="vn">DR</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=12044205001002" target="_blank">12044205001002</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-30</li>				
+								
+									<li>2019-11-23</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfMO pdFA vnZZ">
+						<div class="card-body">
+							<h4>Desc: L4621BC BRS CHR     LAV FAUCET </h4>
+							<h4>MPV: <span class="mf">MO</span> <span class="pd">FA</span> <span class="vn">ZZ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1244L4621BC" target="_blank">1244L4621BC</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-17</li>				
+								
+									<li>2019-12-12</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfTS pdFR vnTS">
+						<div class="card-body">
+							<h4>Desc: B-6K JOB PARTS KIT </h4>
+							<h4>MPV: <span class="mf">TS</span> <span class="pd">FR</span> <span class="vn">TS</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=126203085" target="_blank">126203085</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-26</li>				
+								
+									<li>2019-11-29</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfTS pdFA vnZZ">
+						<div class="card-body">
+							<h4>Desc: B-1100-LN FAUCET LESS NZL DECK MOUNT</h4>
+							<h4>MPV: <span class="mf">TS</span> <span class="pd">FA</span> <span class="vn">ZZ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1262B1100LN" target="_blank">1262B1100LN</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-20</li>				
+								
+									<li>2019-12-27</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfHY pdBV vnSM">
+						<div class="card-body">
+							<h4>Desc: N661WR  15" JUMBO METER BOX 16" X 25-1/2" X 15" DEEP</h4>
+							<h4>MPV: <span class="mf">HY</span> <span class="pd">BV</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1301N661WR" target="_blank">1301N661WR</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-24</li>				
+								
+									<li>2019-12-13</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfJS pdHO vnSM">
+						<div class="card-body">
+							<h4>Desc: HH50I 5/8"     DISHWASHER HOSE 5/8" X 50' H28000</h4>
+							<h4>MPV: <span class="mf">JS</span> <span class="pd">HO</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1333HH50I" target="_blank">1333HH50I</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-16</li>				
+								
+									<li>2019-11-27</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfJS pdCM vnJS">
+						<div class="card-body">
+							<h4>Desc: C74-029LF 7/8  RB COMP UNION </h4>
+							<h4>MPV: <span class="mf">JS</span> <span class="pd">CM</span> <span class="vn">JS</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=140JC74029LF" target="_blank">140JC74029LF</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-20</li>				
+								
+									<li>2019-12-22</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfHY pdES vnZZ">
+						<div class="card-body">
+							<h4>Desc: F06-050 1/2IPS-3/4CTS FC PLATE H22501</h4>
+							<h4>MPV: <span class="mf">HY</span> <span class="pd">ES</span> <span class="vn">ZZ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=140JF06050" target="_blank">140JF06050</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-24</li>				
+								
+									<li>2019-11-23</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfJS pdTP vnSM">
+						<div class="card-body">
+							<h4>Desc: T45-400  4"    PNEU TEST PLUG 83614 / 83588</h4>
+							<h4>MPV: <span class="mf">JS</span> <span class="pd">TP</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=140JT45400" target="_blank">140JT45400</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-17</li>				
+								
+									<li>2019-12-15</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfBH pdDR vnBH">
+						<div class="card-body">
+							<h4>Desc: RSSI338-OB 4 DIA 3-3/8 CENTER </h4>
+							<h4>MPV: <span class="mf">BH</span> <span class="pd">DR</span> <span class="vn">BH</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1482RSSI338OB" target="_blank">1482RSSI338OB</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-22</li>				
+								
+									<li>2019-12-27</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mf9T pdPH vnSM">
+						<div class="card-body">
+							<h4>Desc: 89148 MTL STUD INSUL SUPPORT </h4>
+							<h4>MPV: <span class="mf">9T</span> <span class="pd">PH</span> <span class="vn">SM</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=149389148" target="_blank">149389148</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-27</li>				
+								
+									<li>2019-12-12</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAO pdWH vnAO">
+						<div class="card-body">
+							<h4>Desc: FCG75     NG WATER HEATER  400 </h4>
+							<h4>MPV: <span class="mf">AO</span> <span class="pd">WH</span> <span class="vn">AO</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1656FCG75N400" target="_blank">1656FCG75N400</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-20</li>				
+								
+									<li>2019-11-23</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAO pdWH vnXX">
+						<div class="card-body">
+							<h4>Desc: BT80 NG COMM WATER HEATER 400 *** 400 SERIES **</h4>
+							<h4>MPV: <span class="mf">AO</span> <span class="pd">WH</span> <span class="vn">XX</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1657BT80N400" target="_blank">1657BT80N400</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-22</li>				
+								
+									<li>2019-11-30</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfLB pdPU vnS$">
+						<div class="card-body">
+							<h4>Desc: PRG101A PROVORE PRG-SER 1HP </h4>
+							<h4>MPV: <span class="mf">LB</span> <span class="pd">PU</span> <span class="vn">S$</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=1805PRG101A" target="_blank">1805PRG101A</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-21</li>				
+								
+									<li>2019-12-17</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfMW pdTL vnMW">
+						<div class="card-body">
+							<h4>Desc: 49-56-0739 3-5/8 CARB H0LE SAW DOZER</h4>
+							<h4>MPV: <span class="mf">MW</span> <span class="pd">TL</span> <span class="vn">MW</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=514249560739" target="_blank">514249560739</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-12-17</li>				
+								
+									<li>2019-11-21</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+					<div class="card itemlist mfAQ pd01 vnAQ">
+						<div class="card-body">
+							<h4>Desc: 6035SKML-WH 60X35 LH GTUB </h4>
+							<h4>MPV: <span class="mf">AQ</span> <span class="pd">01</span> <span class="vn">AQ</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId=55006035SKMLWH" target="_blank">55006035SKMLWH</a></h4>
+							<ul class="list-unstyled card-columns">
+								
+									<li>2019-11-19</li>				
+								
+									<li>2019-12-15</li>				
+								
+							</ul>
+						</div>			
+					</div>
+				
+			</div>
+			<br>
+			
+		
+		
+		
+	</div>
+
+
+<!-- Scroll top button (outside container div) -->
+<button id="scrolltop" class="btn btn-primary btn-lg">TOP</button>
+
+</body>
+</html>
