@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Template Test</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script type="text/javascript">
+
+		// count items for table and group header
+		var countItems = function(){
+			$(".freqGroup").each(function(){
+				var count =  0
+				$(this).find(".card").each(function(){
+					if (!$(this).hasClass('d-none')) {
+						count++
+					}
+				})
+				countItemString = count + " items"
+				$(this).find(".itemCount").html(countItemString)
+				var freq = $(this).data('freq')
+				var tableFreqCount = `#tableFreqCount${freq}`
+				$(tableFreqCount).html(count)
+
+			})
+		}
+
+		// main filter function
+		$(document).ready(function(){
+		  $(".filterInput").on("keyup", function(e) {
+		  	$(this).val($(this).val().toUpperCase())
+
+		  	//convert value of active field to lowercase
+		    var value = $(this).val().toLowerCase();
+
+		    //hide all items by default, only reveal ones that match search criteria
+		  	$(".itemlist").addClass('d-none')
+
+		  	//determine what if any MPV fields are being used
+		  	var mpvFlag = false
+		    var valueAsClass = ""
+	    	if ($("#searchMF").val() !== '') {
+		    	valueAsClass += '.mf' + $("#searchMF").val().toUpperCase()
+		    	mpvFlag = true
+		    }
+		    if ($("#searchPD").val() !== '') {
+		    	valueAsClass += '.pd' + $("#searchPD").val().toUpperCase()
+		    	mpvFlag = true
+		    }
+		    if ($("#searchVN").val() !== '') {
+		    	valueAsClass += '.vn' + $("#searchVN").val().toUpperCase()
+		    	mpvFlag = true
+		    }
+
+
+		    // filter by MPV and search or just search only
+		    if (mpvFlag) {
+		    	$(".itemlist").filter(valueAsClass).removeClass('d-none');
+		    	var itemlistContains = `.itemlist:not(:contains('${value.toUpperCase()}'))`
+		    	$(itemlistContains).addClass('d-none')
+		    } else {
+		    	var itemlistContains = `.itemlist:contains('${value.toUpperCase()}')`
+		    	$(itemlistContains).removeClass('d-none')
+		    }
+
+		    // toggle clear button if fields are empty
+		    var fieldsEmptyFlag = true
+		    $('.filterInput').each(function(){
+		    	if ($(this).val() != '') {
+		    		fieldsEmptyFlag = false
+		    	}
+		    })
+		    clearfilter = $('#clearfilter')
+		    if (fieldsEmptyFlag) {
+		    	clearfilter.addClass('d-none')
+		    } else {
+		    	clearfilter.removeClass('d-none')
+		    }
+
+		    //count 
+		    countItems()
+
+		  });
+		});
+
+		// revent default if user its enter in filter list
+		$(document).ready(function(){
+			$(".filterInput").on('submit', function(e){
+				e.preventDefault();
+			})
+		})
+
+		//clear filter button
+		$(document).ready(function(){
+			$('#clearfilter').click(function(){
+				$('.filterInput').val('')
+				$(".itemlist").filter(function() {
+					$(".itemlist").toggle($(this).text().toLowerCase().indexOf("") > -1)
+				});
+				$('.itemlist').removeClass('d-none')
+			    $(this).addClass('d-none')
+			    countItems()
+			    $(window).scrollTo(0,0)
+			})
+		})
+		
+		// make summary table rows clickable
+		$(document).ready(function(){
+			$(".clickable-row").click(function(){
+				window.location = $(this).data('href')
+			})
+		})
+
+		// scroll top button action
+		$(document).ready(function(){
+			$("#scrolltop").click(function(){
+				window.scrollTo(0,0)
+			})
+		})
+
+		// show button
+		$(document).ready(function(){
+			window.onscroll = function() {
+				if ($(document).scrollTop() > 200) {
+					$("#scrolltop").css('display', 'block')
+				} else {
+					$("#scrolltop").css('display', 'none')
+				}
+			}
+		})
+
+	</script>
+
+	<style type="text/css">
+		#scrolltop {
+			display: none;
+			position: fixed;
+			bottom: 20px;
+			left: 20px;
+		}
+
+	</style>
+</head>
+<body>
+
+	<div class="container">
+
+		<div class="jumbotron">
+			<h1>BUY ALERT</h1>
+			<h6>Last {{days}} days from {{today}}</h6>
+			<div class="form-group">
+				<form id="searchBarForm" class="form-inline">
+					<input id="searchBar" class="form-control filterInput" type="text" placeholder="Filter" aria-label="Search" autocomplete="off">
+					<input id="searchMF" class="form-control filterInput mpvFilter" type="text" placeholder="MF" aria-label="Search" autocomplete="off" maxlength=2 size=2>
+					<input id="searchPD" class="form-control filterInput mpvFilter" type="text" placeholder="PD" aria-label="Search" autocomplete="off" maxlength=2 size=2>
+					<input id="searchVN" class="form-control filterInput mpvFilter" type="text" placeholder="VN" aria-label="Search" autocomplete="off" maxlength=2 size=2>
+					&nbsp;&nbsp;<button id="clearfilter" class="btn btn-sm btn-danger d-none">Clear Filter</button>
+				</form>
+			</div>
+		</div>
+
+		<!-- Summary Table -->
+		<h2>Summary</h2>
+		<table class="table table-sm text-center">
+			<thead>
+				<tr>
+					<th>HITS</th>
+					<th>#ITEMS</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for collection in collections %}
+				{% if collection.itemCount|int > 0 %}
+					<tr class="clickable-row" data-href="#freqGroup{{collection.frequency}}" style="cursor: pointer;">
+						<td>{{collection.frequency}}</td>
+						<td id="tableFreqCount{{collection.frequency}}" class="itemCount">{{collection.itemCount}}</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+			</tbody>
+		</table>
+
+		<!-- Report -->
+		<h2>Report</h2>
+		{% for collection in collections %}
+			{% if collection.itemCount|int > 0 %}
+			<div id="freqGroup{{collection.frequency}}" class="freqGroup" data-freq="{{collection.frequency}}">
+				<h3>{{collection.frequency}} HITS - <span class="text-muted itemCount">{{collection.itemCount}} items</span></h3>
+				{% for item in collection['items'] %}
+					<div class="card itemlist mf{{item.mf}} pd{{item.pd}} vn{{item.vn}}">
+						<div class="card-body">
+							<h4>Desc: {{item.desc1}} {{item.desc2}}</h4>
+							<h4>MPV: <span class="mf">{{item.mf}}</span> <span class="pd">{{item.pd}}</span> <span class="vn">{{item.vn}}</span></h4>
+							<h4>WISE#: <a href="http://wservicep1.winwholesale.com/pimitem/#/products?wiseId={{item.itemNum}}" target="_blank">{{item.itemNum}}</a></h4>
+							<ul class="list-unstyled card-columns">
+								{% for date in item.dates %}
+									<li>{{date}}</li>				
+								{% endfor %}
+							</ul>
+						</div>			
+					</div>
+				{% endfor %}
+			</div>
+			<br>
+			{% endif %}
+		{% endfor %}
+		
+		
+	</div>
+
+
+<!-- Scroll top button (outside container div) -->
+<button id="scrolltop" class="btn btn-primary btn-lg">TOP</button>
+
+</body>
+</html>
