@@ -1,6 +1,6 @@
 # buy_alert
 Buy Alert Report
-
+```
 This script takes a "buy alert", saves it to a SQLite database, and then produces an HTML report using Jinja2.
 
 To run this script, 
@@ -31,7 +31,8 @@ To run this script,
          └── Buy_Env (only use this if you want to have a virtual env)
   3.) Place buy alert sheet(s) in Alersheets folder on desktop and then run buyalert.py
   4.) Check Desktop/Buy Alert/Reports for an HTML report.
-  
+ 
+```
   
   
   
