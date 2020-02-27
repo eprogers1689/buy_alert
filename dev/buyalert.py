@@ -2,7 +2,7 @@ import xlrd
 import sqlite3
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askopenfilenames
-import datetime
+from datetime import datetime
 import os
 import sys
 import jinja2
@@ -14,95 +14,126 @@ buy_alert_dev = os.path.join(desktop, "buy alert","dev")
 buy_alert_reports = os.path.join(desktop, "buy alert","reports")
 buy_alert_oldsheets = os.path.join(desktop, "buy alert","old buy alert sheets")
 buy_alert_newsheets = os.path.join(desktop, "alertsheets")
+md5_returned = ""
 
+workbook_dirs = [] #list for holding all of the filenames in the alertsheets folder
+newworkbod_dirs = [] #list for holding all of the new filenames for the buy alert sheets 
 
-workbook_dirs = []
+skip_to_report = False
 
 for filename in os.listdir(buy_alert_newsheets):
 	if filename.endswith(".xls"):
 		workbook_dirs.append(os.path.join(buy_alert_newsheets,filename))
 
+if len(workbook_dirs) > 1:
+	print("Only run one sheet at a time. Remove any extra sheets from the 'alertsheets' folder and try again.")
+	input("Press enter to exit...")
+	sys.exit()
 
-#set NOW for recording date to database
-now = datetime.datetime.now()
-today = now.strftime("%Y-%m-%d") #save date as string
+if len(workbook_dirs) < 1:
+	print("No sheets found in the 'alertsheets' folder. Double check to make sure there is a buy alert sheet the folder.")
+	do_report = ""
+	while do_report is "":
+		do_report = input("Would you like to run a report with existing data? Enter \"Y\" for YES or \"N\" for NO...: ").upper()
+		print(do_report)
+		if do_report == "N":
+			sys.exit()
+		elif do_report == "Y": 
+			skip_to_report = True
+			now = datetime.now()
+			today = now.strftime("%Y-%m-%d") #save date as string
+		else:
+			do_report = ""
+
+
+if not skip_to_report:
+	#set date to user in the data base database
+	today = ""
+	while today is "":
+		today = input("Enter a date for this buy alert sheet in the format: yyyy-mm-dd (e.g. 2020-01-01):")
+		if len(today) != 10:
+			print("\nSomething whent wrong, try again and make sure you use the format yyyy-mm-dd (e.g. 2020-01-01).")
+			today = ""
+		else:
+			try:
+				datetime.strptime(today,"%Y-%m-%d")
+			except Exception as e:
+				print("\nSomething whent wrong, try again and make sure you use the format yyyy-mm-dd (e.g. 2020-01-01).")
+				today = ""
+
 
 #open sqlite connection
 conn = sqlite3.connect('db_dev')
 c = conn.cursor()
 
 
-#pick a workbook
-# Tk().withdraw()
-# workbook_dirs = askopenfilenames(defaultextension=".xlsx", filetypes=[('BUYALERT','*.xls')]) #returns tuple of file names
+if not skip_to_report:
+	for workbook_dir in workbook_dirs:
+		#check md5 check sum to see if this file has been imported yet
+		with open(workbook_dir, 'rb') as file_to_check:
+		    # read contents of the file
+		    data = file_to_check.read()    
+		    # pipe contents of the file through
+		    md5_returned = hashlib.md5(data).hexdigest()
 
 
-for workbook_dir in workbook_dirs:
-	#check md5 check sum to see if this file has been imported yet
-	with open(workbook_dir, 'rb') as file_to_check:
-	    # read contents of the file
-	    data = file_to_check.read()    
-	    # pipe contents of the file through
-	    md5_returned = hashlib.md5(data).hexdigest()
-
-
-	# get max entry id
-	c.execute('''SELECT MAX(ID) FROM hash''')
-	nextHashId = c.fetchone()[0]
-	if nextHashId is None:
-		nextHashId = 1
-	else:
-		nextHashId += 1
-
-	c.execute('SELECT hash FROM hash WHERE(hash=?)',[md5_returned])
-	returnedHash = c.fetchone()
-	if returnedHash is None or returnedHash[0] != md5_returned:
-		print("Adding: " + workbook_dir)
-		newHashEntry = (nextHashId, md5_returned, today)
-		c.execute('INSERT INTO hash VALUES(?,?,?)', newHashEntry)
-		conn.commit()
-		#get read workbook and count rows
-		workbook = xlrd.open_workbook(workbook_dir)
-		worksheet = workbook.sheet_by_index(0)
-		num_rows = worksheet.nrows
-
-		#get max entry id
-		c.execute('''SELECT MAX(ID) FROM Entry''')
-		nextEntryId = c.fetchone()[0]
-		if nextEntryId is None:
-			nextEntryId = 1
+		# get max entry id
+		c.execute('''SELECT MAX(ID) FROM hash''')
+		nextHashId = c.fetchone()[0]
+		if nextHashId is None:
+			nextHashId = 1
 		else:
-			nextEntryId += 1
+			nextHashId += 1
 
-		#loop through sheet - add new items, record all entries
-		entries = []
+		c.execute('SELECT hash FROM hash WHERE(hash=?)',[md5_returned])
+		returnedHash = c.fetchone()
+		if returnedHash is None or returnedHash[0] != md5_returned:
+			print("Adding: " + workbook_dir)
+			newHashEntry = (nextHashId, md5_returned, today)
+			c.execute('INSERT INTO hash VALUES(?,?,?)', newHashEntry)
+			conn.commit()
+			#get read workbook and count rows
+			workbook = xlrd.open_workbook(workbook_dir)
+			worksheet = workbook.sheet_by_index(0)
+			num_rows = worksheet.nrows
 
-		for i in range(1, num_rows):
-			pd = worksheet.cell_value(i,1)
-			mf = worksheet.cell_value(i,0)
-			vn = worksheet.cell_value(i,2)
-			itemNum = worksheet.cell_value(i,3)
-			desc1 = worksheet.cell_value(i,4)
-			desc2 = worksheet.cell_value(i,5)
+			#get max entry id
+			c.execute('''SELECT MAX(ID) FROM Entry''')
+			nextEntryId = c.fetchone()[0]
+			if nextEntryId is None:
+				nextEntryId = 1
+			else:
+				nextEntryId += 1
+
+			#loop through sheet - add new items, record all entries
+			entries = []
+
+			for i in range(1, num_rows):
+				pd = worksheet.cell_value(i,1)
+				mf = worksheet.cell_value(i,0)
+				vn = worksheet.cell_value(i,2)
+				itemNum = worksheet.cell_value(i,3)
+				desc1 = worksheet.cell_value(i,4)
+				desc2 = worksheet.cell_value(i,5)
 
 
-			# Check if Item Already in Database
-			c.execute('SELECT * FROM Item WHERE(ItemNum=?)', [itemNum])
-			if c.fetchone() == None:
-				newItem = (itemNum, pd, mf, vn, desc1, desc2)
-				c.execute('INSERT INTO Item VALUES (?,?,?,?,?,?)', newItem)
-				conn.commit()
+				# Check if Item Already in Database
+				c.execute('SELECT * FROM Item WHERE(ItemNum=?)', [itemNum])
+				if c.fetchone() == None:
+					newItem = (itemNum, pd, mf, vn, desc1, desc2)
+					c.execute('INSERT INTO Item VALUES (?,?,?,?,?,?)', newItem)
+					conn.commit()
 
 
-			# record entries
-			entry = (nextEntryId, itemNum, str(today))
-			entries.append(entry)
-			nextEntryId += 1
+				# record entries
+				entry = (nextEntryId, itemNum, str(today))
+				entries.append(entry)
+				nextEntryId += 1
 
-		c.executemany('INSERT INTO Entry VALUES (?,?,?)', entries)
-		conn.commit()
-	else:
-		print("Skipping: " + workbook_dir)
+			c.executemany('INSERT INTO Entry VALUES (?,?,?)', entries)
+			conn.commit()
+		else:
+			print("Skipping: " + workbook_dir)
 		
 
 
@@ -174,7 +205,6 @@ if len(itemsToReport) > 0:
 	template = templateEnv.get_template(TEMPLATE_FILE) 
 
 
-	today = now.strftime("%m-%d-%Y")
 	days = days - 1
 	outputText = template.render(collections=collections,today=today,days=days)
 
@@ -192,13 +222,8 @@ else:
 conn.close()
 
 #move worksheets to 
-count = 1 
 for filename in os.listdir(buy_alert_newsheets):
 	if filename.endswith(".xls"):
-		if len(os.listdir(buy_alert_newsheets)) > 1:
-			new_filename = "Old Buy Alert - " + today + " - (" + str(count) + ").xls"
-		else:
-			new_filename = "Old Buy Alert - " + today + ".xls"
+		new_filename = "Old Buy Alert - " + today + " - (" + str(md5_returned) + ").xls"
 		print(filename)
 		os.rename(os.path.join(buy_alert_newsheets,filename), os.path.join(buy_alert_oldsheets, new_filename))
-		count += 1

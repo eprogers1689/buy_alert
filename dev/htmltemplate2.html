@@ -99,13 +99,14 @@
 				$('.itemlist').removeClass('d-none')
 			    $(this).addClass('d-none')
 			    countItems()
-			    $(window).scrollTo(0,0)
+			    window.location = $(".jumbotron").data('href');
 			})
 		})
 		
 		// make summary table rows clickable
 		$(document).ready(function(){
 			$(".clickable-row").click(function(){
+				console.log("clickable-row called")
 				window.location = $(this).data('href')
 			})
 		})
@@ -144,7 +145,7 @@
 
 	<div class="container">
 
-		<div class="jumbotron">
+		<div class="jumbotron" data-href="#jumbotron">
 			<h1>BUY ALERT</h1>
 			<h6>Last {{days}} days from {{today}}</h6>
 			<div class="form-group">
